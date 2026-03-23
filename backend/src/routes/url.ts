@@ -4,23 +4,15 @@ import { nanoid } from "nanoid";
 import { db } from "../db";
 import { urls } from "../db/schema";
 import { authenticate } from "../middleware/auth";
+import { validateUrl, validateUuid } from "../utils/validate";
 
 const router = Router();
 
 router.post("/", authenticate, async (req: Request, res: Response) => {
     const { url } = req.body;
 
-    if (!url) {
-        res.status(400).json({ error: "URL is required" });
-        return;
-    }
-
-    try {
-        new URL(url);
-    } catch {
-        res.status(400).json({ error: "Invalid URL" });
-        return;
-    }
+    const urlError = validateUrl(url);
+    if (urlError) { res.status(400).json({ error: urlError }); return; }
 
     const shortCode = nanoid(8);
 
@@ -41,6 +33,9 @@ router.get("/", authenticate, async (req: Request, res: Response) => {
 
 router.delete("/:id", authenticate, async (req: Request, res: Response) => {
     const id = req.params.id as string;
+
+    const idError = validateUuid(id);
+    if (idError) { res.status(400).json({ error: idError }); return; }
 
     const [deleted] = await db.delete(urls).where(
         and(eq(urls.id, id), eq(urls.userId, req.userId!))

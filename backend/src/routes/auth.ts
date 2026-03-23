@@ -4,6 +4,7 @@ import { db } from "../db";
 import { users } from "../db/schema";
 import { hashPassword, comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
+import { validateEmail, validatePassword } from "../utils/validate";
 
 const DUMMY_HASH = "$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012";
 
@@ -12,10 +13,11 @@ const router = Router();
 router.post("/signup", async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-        res.status(400).json({ error: "Email and password are required" });
-        return;
-    }
+    const emailError = validateEmail(email);
+    if (emailError) { res.status(400).json({ error: emailError }); return; }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) { res.status(400).json({ error: passwordError }); return; }
 
     const existing = await db.select().from(users).where(eq(users.email, email));
 
@@ -43,6 +45,9 @@ router.post("/login", async (req: Request, res: Response) => {
         res.status(400).json({ error: "Email and password are required" });
         return;
     }
+
+    const emailError = validateEmail(email);
+    if (emailError) { res.status(400).json({ error: emailError }); return; }
 
     const [user] = await db.select().from(users).where(eq(users.email, email));
 
