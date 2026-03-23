@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
+import cors from "cors";
 import authRoutes from "./routes/auth";
 import urlRoutes from "./routes/url";
 import redirectRoutes from "./routes/redirect";
@@ -9,6 +10,7 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
+app.use(cors({ origin: process.env.CORS_ORIGIN }));
 app.use(express.json());
 
 app.get("/health", (_req: Request, res: Response) => {
