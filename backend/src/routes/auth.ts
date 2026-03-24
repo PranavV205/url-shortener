@@ -5,12 +5,13 @@ import { users } from "../db/schema";
 import { hashPassword, comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { validateEmail, validatePassword } from "../utils/validate";
+import { asyncHandler } from "../middleware/error";
 
 const DUMMY_HASH = "$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012";
 
 const router = Router();
 
-router.post("/signup", async (req: Request, res: Response) => {
+router.post("/signup", asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     const emailError = validateEmail(email);
@@ -36,9 +37,9 @@ router.post("/signup", async (req: Request, res: Response) => {
     const token = signToken(user.id);
 
     res.status(201).json({ token });
-});
+}));
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -62,6 +63,6 @@ router.post("/login", async (req: Request, res: Response) => {
     const token = signToken(user.id);
 
     res.json({ token });
-});
+}));
 
 export default router;

@@ -5,10 +5,11 @@ import { db } from "../db";
 import { urls } from "../db/schema";
 import { authenticate } from "../middleware/auth";
 import { validateUrl, validateUuid } from "../utils/validate";
+import { asyncHandler } from "../middleware/error";
 
 const router = Router();
 
-router.post("/", authenticate, async (req: Request, res: Response) => {
+router.post("/", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const { url } = req.body;
 
     const urlError = validateUrl(url);
@@ -23,15 +24,15 @@ router.post("/", authenticate, async (req: Request, res: Response) => {
     }).returning();
 
     res.status(201).json(created);
-});
+}));
 
-router.get("/", authenticate, async (req: Request, res: Response) => {
+router.get("/", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const userUrls = await db.select().from(urls).where(eq(urls.userId, req.userId!));
 
     res.json(userUrls);
-});
+}));
 
-router.delete("/:id", authenticate, async (req: Request, res: Response) => {
+router.delete("/:id", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
 
     const idError = validateUuid(id);
@@ -47,6 +48,6 @@ router.delete("/:id", authenticate, async (req: Request, res: Response) => {
     }
 
     res.json({ message: "URL deleted" });
-});
+}));
 
 export default router;

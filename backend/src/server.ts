@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth";
 import urlRoutes from "./routes/url";
 import redirectRoutes from "./routes/redirect";
+import { errorHandler } from "./middleware/error";
 
 dotenv.config();
 
@@ -20,6 +21,8 @@ app.get("/health", (_req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/urls", urlRoutes);
 app.use(redirectRoutes);
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`[Server] Server listening on port ${PORT}`);
