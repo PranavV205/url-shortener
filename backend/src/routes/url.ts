@@ -15,15 +15,23 @@ router.post("/", authenticate, asyncHandler(async (req: Request, res: Response) 
     const urlError = validateUrl(url);
     if (urlError) { res.status(400).json({ error: urlError }); return; }
 
-    const shortCode = nanoid(8);
+    const MAX_RETRIES = 3;
+    for (let i = 0; i < MAX_RETRIES; i++) {
+        const shortCode = nanoid(8);
+        try {
+            const [created] = await db.insert(urls).values({
+                shortCode,
+                originalUrl: url,
+                userId: req.userId!,
+            }).returning();
 
-    const [created] = await db.insert(urls).values({
-        shortCode,
-        originalUrl: url,
-        userId: req.userId!,
-    }).returning();
-
-    res.status(201).json(created);
+            res.status(201).json(created);
+            return;
+        } catch (err: unknown) {
+            const isUniqueViolation = err instanceof Error && err.message.includes("unique");
+            if (!isUniqueViolation || i === MAX_RETRIES - 1) throw err;
+        }
+    }
 }));
 
 router.get("/", authenticate, asyncHandler(async (req: Request, res: Response) => {
