@@ -6,7 +6,10 @@ import urlRoutes from "./routes/url";
 import redirectRoutes from "./routes/redirect";
 import { errorHandler } from "./middleware/error";
 
+import { validateEnv } from "./utils/env";
+
 dotenv.config();
+validateEnv();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
