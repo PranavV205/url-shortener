@@ -32,7 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(null);
     }
 
-    if (!loaded) return null;
+    if (!loaded) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+            </div>
+        );
+    }
 
     return (
         <AuthContext value={{ token, setToken, logout }}>
